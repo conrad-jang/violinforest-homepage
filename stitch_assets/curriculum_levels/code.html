@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Violin Forest - Curriculum</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Lexend:wght@300;400;500;600;700&amp;family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&amp;family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script>
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#1a4a31", // Forest Green
+                        "primary-light": "#2a6e49",
+                        "accent": "#D4AF37", // Gold
+                        "background-light": "#FDFBF7", // Ivory paper feel
+                        "background-dark": "#102216",
+                        "surface-light": "#ffffff",
+                        "surface-dark": "#1c2e22",
+                    },
+                    fontFamily: {
+                        "display": ["Lexend", "sans-serif"],
+                        "serif": ["Playfair Display", "serif"],
+                    },
+                    backgroundImage: {
+                        'paper-texture': "url(\"data:image/svg+xml,%3Csvg width='100' height='100' viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.03'/%3E%3C/svg%3E\")",
+                    },
+                    boxShadow: {
+                        'card-gold': '0 4px 20px -2px rgba(212, 175, 55, 0.15)',
+                        'card-hover': '0 10px 25px -5px rgba(26, 74, 49, 0.15)',
+                    }
+                },
+            },
+        }
+    </script>
+<style>
+        .no-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        .no-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+        @keyframes float {
+            0% { transform: translateY(0px); }
+            50% { transform: translateY(-5px); }
+            100% { transform: translateY(0px); }
+        }
+        .animate-float {
+            animation: float 4s ease-in-out infinite;
+        }
+    </style>
+<style>
+        body {
+            min-height: max(884px, 100dvh);
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background-light dark:bg-background-dark font-display text-slate-900 dark:text-slate-100 antialiased selection:bg-accent/30">
+<div class="relative flex h-full min-h-screen w-full flex-col overflow-hidden mx-auto max-w-md bg-paper-texture shadow-2xl">
+<header class="sticky top-0 z-30 bg-background-light/95 dark:bg-background-dark/95 backdrop-blur-md border-b border-stone-200 dark:border-stone-800 transition-colors duration-300">
+<div class="flex items-center justify-between p-4 pb-2">
+<button class="flex size-10 items-center justify-center rounded-full hover:bg-stone-100 dark:hover:bg-stone-800 transition-colors group">
+<span class="material-symbols-outlined text-primary dark:text-accent group-hover:-translate-x-1 transition-transform">arrow_back</span>
+</button>
+<h1 class="text-xl font-bold tracking-tight text-primary dark:text-white flex-1 text-center font-serif">Curriculum</h1>
+<button class="flex size-10 items-center justify-center rounded-full hover:bg-stone-100 dark:hover:bg-stone-800 transition-colors">
+<span class="material-symbols-outlined text-primary dark:text-accent">search</span>
+</button>
+</div>
+<div class="px-4 pb-4 pt-1">
+<p class="text-stone-600 dark:text-stone-400 text-sm font-light leading-relaxed text-center max-w-xs mx-auto font-serif italic">
+                    "From the first note to the concert stage."
+                </p>
+</div>
+<div class="flex px-6 justify-between gap-4 pb-0 overflow-x-auto no-scrollbar border-b border-stone-100 dark:border-stone-800">
+<button class="group flex flex-col items-center justify-center px-4 pb-3 pt-2 relative">
+<span class="text-primary dark:text-accent text-base font-bold tracking-wide">Beginner</span>
+<div class="absolute bottom-0 h-[3px] w-full rounded-t-full bg-accent shadow-[0_-2px_6px_rgba(212,175,55,0.4)] transition-all"></div>
+</button>
+<button class="group flex flex-col items-center justify-center px-4 pb-3 pt-2 relative opacity-60 hover:opacity-100 transition-opacity">
+<span class="text-stone-600 dark:text-stone-400 text-base font-serif italic tracking-wide">Intermediate</span>
+<div class="absolute bottom-0 h-[3px] w-0 rounded-t-full bg-transparent group-hover:bg-stone-300 transition-all duration-300 group-hover:w-1/2"></div>
+</button>
+<button class="group flex flex-col items-center justify-center px-4 pb-3 pt-2 relative opacity-60 hover:opacity-100 transition-opacity">
+<span class="text-stone-600 dark:text-stone-400 text-base font-serif italic tracking-wide">Advanced</span>
+<div class="absolute bottom-0 h-[3px] w-0 rounded-t-full bg-transparent group-hover:bg-stone-300 transition-all duration-300 group-hover:w-1/2"></div>
+</button>
+</div>
+</header>
+<main class="flex-1 overflow-y-auto p-5 pb-32 space-y-8 scroll-smooth">
+<div class="relative overflow-hidden rounded-[2rem] shadow-card-gold ring-1 ring-black/5 dark:ring-white/10 group animate-float">
+<div class="absolute inset-0 bg-cover bg-center transition-transform duration-1000 group-hover:scale-110" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuDp6p0p5Pfc-mRpencCiIK_lljy6qUlNuuqJatpD3DeSfDwSDljJgS3Jnmpw4QVL2IoxdghDMKWA3XTpX4XWkyVzrr8nx7DQwNqH7QbPb7g9hHcDHSAeUrFDYt4YJTjX7dKaYZCE1YVmGhoAr8RWIgUZ17XPqne6e997uSkrwo3pxJ-TNRqonHu_MIrDbcly6kcGiX7GX0lsQxx8LLDyzrzgWLlpbO_PjSt3SW92bXX5iEXUUTwMeVDsAH5-IAjfYsKu893ckmEnoEy');"></div>
+<div class="absolute inset-0 bg-gradient-to-t from-primary via-primary/60 to-transparent mix-blend-multiply"></div>
+<div class="relative flex flex-col items-start justify-end p-6 pt-36 h-full">
+<div class="mb-3 flex items-center gap-2">
+<span class="rounded-full bg-accent px-3 py-1 text-[10px] font-bold uppercase tracking-wider text-white shadow-lg">Foundations</span>
+<span class="text-xs font-medium text-white/90 font-serif italic">Level I</span>
+</div>
+<h2 class="font-serif text-3xl text-white font-medium italic leading-none mb-3 drop-shadow-md">The First Note</h2>
+<p class="text-sm text-stone-100/90 line-clamp-2 mb-5 font-light">Establishing the foundation of your sound through proper posture, bow hold, and open string mastery.</p>
+<div class="grid grid-cols-2 gap-2 w-full mb-4">
+<div class="bg-white/10 backdrop-blur-sm rounded-lg p-2 border border-white/10 flex items-center gap-2">
+<span class="material-symbols-outlined text-accent text-lg">accessibility_new</span>
+<span class="text-xs text-white">Posture</span>
+</div>
+<div class="bg-white/10 backdrop-blur-sm rounded-lg p-2 border border-white/10 flex items-center gap-2">
+<span class="material-symbols-outlined text-accent text-lg">music_note</span>
+<span class="text-xs text-white">Tone</span>
+</div>
+</div>
+<button class="w-full rounded-xl bg-surface-light text-primary font-bold py-3.5 px-4 flex items-center justify-center gap-2 hover:bg-accent hover:text-white transition-all duration-300 shadow-lg group/btn">
+<span class="material-symbols-outlined text-[20px] group-hover/btn:scale-110 transition-transform">play_circle</span>
+<span>Start Lesson</span>
+</button>
+</div>
+</div>
+<div class="relative pl-6 border-l-2 border-stone-200 dark:border-stone-800 ml-4 space-y-8">
+<div class="relative group">
+<div class="absolute -left-[33px] mt-6 flex h-8 w-8 items-center justify-center rounded-full bg-primary text-accent ring-4 ring-background-light dark:ring-background-dark shadow-lg z-10">
+<span class="material-symbols-outlined text-[18px]">verified</span>
+</div>
+<div class="ml-4 bg-white dark:bg-surface-dark rounded-2xl p-5 shadow-sm border border-stone-100 dark:border-stone-800 hover:shadow-card-hover hover:border-accent/30 transition-all duration-300 transform hover:-translate-y-1">
+<div class="flex justify-between items-start mb-2">
+<div>
+<h3 class="font-serif text-xl text-primary dark:text-white font-semibold">Posture &amp; Hold</h3>
+<p class="text-xs text-stone-500 uppercase tracking-widest font-bold mt-1">Module 1 • Completed</p>
+</div>
+<span class="material-symbols-outlined text-stone-300 text-[24px]">check_circle</span>
+</div>
+</div>
+</div>
+<div class="relative group">
+<div class="absolute -left-[33px] mt-6 flex h-8 w-8 items-center justify-center rounded-full bg-white border-2 border-accent text-accent ring-4 ring-background-light dark:ring-background-dark shadow-md z-10">
+<span class="material-symbols-outlined text-[16px]">lock_open</span>
+</div>
+<div class="ml-4 bg-white dark:bg-surface-dark rounded-2xl p-6 shadow-card-gold border border-accent/20 relative overflow-hidden transform transition-all duration-300 hover:scale-[1.02]">
+<div class="absolute right-[-20px] top-[-20px] p-6 opacity-5 rotate-12">
+<span class="material-symbols-outlined text-[100px] text-primary">waves</span>
+</div>
+<div class="relative z-10">
+<div class="flex justify-between items-start mb-2">
+<h3 class="font-serif text-xl text-primary dark:text-white font-semibold">Technique &amp; Expression</h3>
+<span class="bg-primary/10 text-primary dark:text-accent text-[10px] font-bold px-2 py-1 rounded-md uppercase">Next Up</span>
+</div>
+<p class="text-sm text-stone-600 dark:text-stone-300 mb-4 font-light leading-relaxed">
+                                Dive into the art of <span class="text-primary font-medium dark:text-accent">Vibrato</span> and shifting positions to bring warmth to your sound.
+                            </p>
+<ul class="space-y-3 mb-4">
+<li class="flex items-center gap-3 text-sm text-stone-700 dark:text-stone-300 bg-stone-50 dark:bg-stone-800/50 p-2 rounded-lg">
+<span class="material-symbols-outlined text-accent text-sm">graphic_eq</span>
+<span>Vibrato Mechanics</span>
+</li>
+<li class="flex items-center gap-3 text-sm text-stone-700 dark:text-stone-300 bg-stone-50 dark:bg-stone-800/50 p-2 rounded-lg">
+<span class="material-symbols-outlined text-accent text-sm">pan_tool_alt</span>
+<span>Shifting to 3rd Position</span>
+</li>
+</ul>
+</div>
+</div>
+</div>
+<div class="relative opacity-70 hover:opacity-100 transition-opacity duration-300">
+<div class="absolute -left-[33px] mt-6 flex h-8 w-8 items-center justify-center rounded-full bg-stone-200 dark:bg-stone-800 text-stone-400 ring-4 ring-background-light dark:ring-background-dark z-10">
+<span class="material-symbols-outlined text-[16px]">lock</span>
+</div>
+<div class="ml-4 bg-stone-50 dark:bg-stone-900/40 rounded-2xl p-5 border border-dashed border-stone-300 dark:border-stone-700">
+<div class="flex justify-between items-start mb-1">
+<h3 class="font-serif text-lg text-stone-500 dark:text-stone-400 font-medium italic">Advanced Repertoire</h3>
+</div>
+<p class="text-xs text-stone-400 mb-3 uppercase tracking-wide">Entrance Exams Prep</p>
+<div class="flex gap-2">
+<span class="h-1.5 w-8 rounded-full bg-stone-300 dark:bg-stone-700"></span>
+<span class="h-1.5 w-8 rounded-full bg-stone-300 dark:bg-stone-700"></span>
+<span class="h-1.5 w-12 rounded-full bg-stone-300 dark:bg-stone-700"></span>
+</div>
+</div>
+</div>
+</div>
+<div class="mt-8 relative overflow-hidden rounded-2xl bg-primary dark:bg-surface-dark p-1 shadow-lg group">
+<div class="absolute -right-10 -top-10 h-32 w-32 rounded-full bg-accent/20 blur-2xl group-hover:bg-accent/30 transition-all"></div>
+<div class="relative flex items-center justify-between rounded-xl border border-white/10 bg-white/5 p-4 backdrop-blur-sm">
+<div class="flex items-center gap-4">
+<div class="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-accent text-white shadow-lg animate-pulse">
+<span class="material-symbols-outlined text-2xl">quiz</span>
+</div>
+<div>
+<p class="text-[10px] font-bold uppercase tracking-wider text-accent mb-0.5">Assessment</p>
+<h4 class="font-serif text-lg font-semibold text-white">Check My Level</h4>
+</div>
+</div>
+<button class="rounded-full bg-white p-2 text-primary hover:scale-110 transition-transform shadow-md">
+<span class="material-symbols-outlined">arrow_forward</span>
+</button>
+</div>
+</div>
+<div class="h-12"></div>
+</main>
+<nav class="fixed bottom-0 z-50 w-full max-w-md bg-white/90 dark:bg-stone-900/90 backdrop-blur-lg border-t border-stone-200 dark:border-stone-800 px-6 pb-6 pt-3 shadow-[0_-8px_30px_-5px_rgba(0,0,0,0.1)] rounded-t-3xl">
+<div class="flex justify-between items-center">
+<a class="group flex flex-col items-center gap-1 text-stone-400 hover:text-primary dark:hover:text-accent transition-colors w-16" href="#">
+<div class="relative p-1">
+<span class="material-symbols-outlined text-[26px] group-hover:-translate-y-1 transition-transform duration-300">school</span>
+</div>
+<span class="text-[10px] font-medium tracking-wide opacity-0 group-hover:opacity-100 transition-opacity absolute -bottom-1">Academy</span>
+</a>
+<a class="group flex flex-col items-center gap-1 text-primary dark:text-accent w-16" href="#">
+<div class="relative p-2 bg-primary/10 dark:bg-accent/10 rounded-2xl">
+<span class="material-symbols-outlined text-[26px] font-bold">auto_stories</span>
+<span class="absolute -top-1 -right-1 h-2.5 w-2.5 rounded-full bg-accent border-2 border-white dark:border-stone-900 animate-pulse"></span>
+</div>
+<span class="text-[10px] font-bold tracking-wide mt-1">Curriculum</span>
+</a>
+<a class="group flex flex-col items-center gap-1 text-stone-400 hover:text-primary dark:hover:text-accent transition-colors w-16" href="#">
+<div class="relative p-1">
+<span class="material-symbols-outlined text-[26px] group-hover:-translate-y-1 transition-transform duration-300">payments</span>
+</div>
+<span class="text-[10px] font-medium tracking-wide opacity-0 group-hover:opacity-100 transition-opacity absolute -bottom-1">Tuition</span>
+</a>
+<a class="group flex flex-col items-center gap-1 text-stone-400 hover:text-primary dark:hover:text-accent transition-colors w-16" href="#">
+<div class="relative p-1">
+<span class="material-symbols-outlined text-[26px] group-hover:-translate-y-1 transition-transform duration-300">location_on</span>
+</div>
+<span class="text-[10px] font-medium tracking-wide opacity-0 group-hover:opacity-100 transition-opacity absolute -bottom-1">Location</span>
+</a>
+</div>
+</nav>
+</div>
+
+</body></html>
