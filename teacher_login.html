@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="ko">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>선생님 로그인 - 바이올린 포레스트</title>
+
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@200..800&family=Playfair+Display:ital,wght@0,400..900&family=Lexend:wght@100..900&family=Noto+Sans+KR:wght@300;400;500;700&family=Noto+Serif+KR:wght@300;400;700&family=Nanum+Myeongjo:wght@400;700;800&family=Nanum+Pen+Script&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" as="style" crossorigin
+        href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard-dynamic-subset.min.css" />
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap"
+        rel="stylesheet">
+
+    <script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#1e3a2f",
+                        "primary-light": "#2d5645",
+                        "accent-gold": "#c5a044",
+                        "forest-dark": "#0B1A14",
+                        "soft-beige": "#f2f1eb",
+                        "background-light": "#fcfbf7",
+                    },
+                    fontFamily: {
+                        "display": ["Pretendard", "Lexend", "Noto Sans KR", "sans-serif"],
+                        "serif": ["Nanum Myeongjo", "serif"],
+                        "sans": ["Pretendard", "Plus Jakarta Sans", "Noto Sans KR", "sans-serif"],
+                        "korean-serif": ["Nanum Myeongjo", "serif"],
+                    },
+                    borderRadius: { "DEFAULT": "1rem", "lg": "2rem", "xl": "3rem", "full": "9999px" },
+                    boxShadow: {
+                        'card-gold': '0 4px 20px -2px rgba(197, 160, 68, 0.15)',
+                        'card-hover': '0 10px 25px -5px rgba(30, 58, 47, 0.15)',
+                    }
+                },
+            },
+        }
+    </script>
+    <style>
+        .bg-glass {
+            backdrop-filter: blur(12px);
+            background-color: rgba(255, 255, 255, 0.9);
+        }
+    </style>
+</head>
+
+<body
+    class="bg-soft-beige text-slate-900 font-sans antialiased min-h-screen flex items-center justify-center relative overflow-hidden">
+
+    <!-- Background Decor (Like director's profile) -->
+    <div class="absolute inset-0 bg-gradient-to-b from-primary/5 to-transparent pointer-events-none"></div>
+    <div class="absolute -right-40 top-0 w-96 h-96 bg-accent-gold/10 rounded-full blur-[100px] pointer-events-none">
+    </div>
+    <div class="absolute -left-40 bottom-0 w-96 h-96 bg-primary/10 rounded-full blur-[100px] pointer-events-none"></div>
+
+    <div class="w-full max-w-md px-6 relative z-10">
+        <!-- Card -->
+        <div class="bg-white rounded-[2rem] shadow-2xl overflow-hidden border border-white/50 relative group">
+            <div
+                class="absolute inset-0 bg-accent-gold/5 opacity-0 group-hover:opacity-100 transition-opacity duration-700 pointer-events-none">
+            </div>
+
+            <div class="p-10 pt-12">
+                <!-- Header -->
+                <div class="text-center mb-10">
+                    <span class="text-accent-gold font-bold uppercase tracking-[0.2em] mb-3 block text-xs">Admin
+                        Access</span>
+                    <h2 class="text-4xl font-serif font-bold text-primary mb-3">선생님 로그인</h2>
+                    <p class="text-sm text-slate-500 font-light">바이올린 포레스트 관리자 전용 페이지입니다.</p>
+                </div>
+
+                <!-- Form -->
+                <form id="loginForm" class="space-y-6">
+                    <div class="space-y-2">
+                        <label for="teacherId" class="block text-sm font-bold text-slate-700 ml-1">아이디</label>
+                        <div class="relative">
+                            <span class="absolute inset-y-0 left-0 flex items-center pl-4 text-slate-400">
+                                <span class="material-symbols-outlined text-[20px]">person</span>
+                            </span>
+                            <input type="text" id="teacherId" name="id" required placeholder="아이디를 입력하세요"
+                                class="w-full pl-11 pr-4 py-3.5 bg-slate-50 border-0 ring-1 ring-slate-200 focus:ring-2 focus:ring-primary rounded-xl text-sm transition-all outline-none">
+                        </div>
+                    </div>
+
+                    <div class="space-y-2">
+                        <label for="password" class="block text-sm font-bold text-slate-700 ml-1">비밀번호</label>
+                        <div class="relative">
+                            <span class="absolute inset-y-0 left-0 flex items-center pl-4 text-slate-400">
+                                <span class="material-symbols-outlined text-[20px]">lock</span>
+                            </span>
+                            <input type="password" id="password" name="password" required placeholder="비밀번호를 입력하세요"
+                                class="w-full pl-11 pr-4 py-3.5 bg-slate-50 border-0 ring-1 ring-slate-200 focus:ring-2 focus:ring-primary rounded-xl text-sm transition-all outline-none">
+                        </div>
+                    </div>
+
+                    <!-- Error Message -->
+                    <div id="errorMsg"
+                        class="hidden text-red-500 text-sm font-bold text-center mt-2 bg-red-50 py-2 rounded-lg">
+                        <!-- 에러 메시지 출력 영역 -->
+                    </div>
+
+                    <div class="pt-4">
+                        <button type="submit" id="submitBtn"
+                            class="w-full py-4 bg-primary text-white rounded-xl font-bold text-base shadow-lg shadow-primary/20 hover:bg-primary-light transition-all transform hover:-translate-y-0.5 flex justify-center items-center gap-2">
+                            <span id="btnText">로그인</span>
+                            <svg id="loadingIcon" class="hidden animate-spin h-5 w-5 text-white"
+                                xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor"
+                                    stroke-width="4"></circle>
+                                <path class="opacity-75" fill="currentColor"
+                                    d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z">
+                                </path>
+                            </svg>
+                        </button>
+                    </div>
+                </form>
+
+                <div class="mt-8 text-center text-xs text-slate-400">
+                    <a href="index.html"
+                        class="hover:text-primary transition-colors flex items-center justify-center gap-1 font-bold">
+                        <span class="material-symbols-outlined text-[14px]">arrow_back</span>
+                        홈페이지로 돌아가기
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Login Logic Script -->
+    <script>
+        const loginForm = document.getElementById('loginForm');
+        const submitBtn = document.getElementById('submitBtn');
+        const btnText = document.getElementById('btnText');
+        const loadingIcon = document.getElementById('loadingIcon');
+        const errorMsg = document.getElementById('errorMsg');
+
+        // Google Apps Script API URL
+        const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwDVdNgJX4eiW_OejbaPvZWXOvvPQUSGelD1K7JQQkMPR5mzMdGVDjmHNNC3RbwnPPfcg/exec";
+
+        loginForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const id = document.getElementById('teacherId').value;
+            const password = document.getElementById('password').value;
+
+            setLoading(true);
+            errorMsg.classList.add('hidden');
+
+            try {
+                // 구글 앱스 스크립트에서 JSON.parse(postData)를 하는 경우, 
+                // CORS preflight를 피하기 위해 text/plain 속성으로 JSON 문자열을 보냅니다.
+                const response = await fetch(GOOGLE_SCRIPT_URL, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+                    body: JSON.stringify({ action: 'login', id: id, pw: password })
+                });
+
+                const result = await response.json();
+
+                // 성공 여부 판단 로직
+                if (result.success || result.result === 'success' || result.status === 200 || result.success === "true") {
+                    // 선생님 성함 및 ID를 스토리지에 저장
+                    const teacherName = result.name || result.teacherName || "관리자";
+                    localStorage.setItem('teacherId', id);
+                    localStorage.setItem('teacherName', teacherName);
+
+                    // 시간표 페이지로 이동
+                    window.location.href = 'timetable.html';
+                } else {
+                    // 인증 실패 (틀린 아이디/비밀번호 등)
+                    showError(result.message || "아이디 또는 비밀번호가 올바르지 않습니다.");
+                }
+
+            } catch (error) {
+                console.error("Login Post Error:", error);
+                showError("서버와의 통신에 실패했습니다. 관리자에게 문의해주세요.");
+            } finally {
+                setLoading(false);
+            }
+        });
+
+        function setLoading(isLoading) {
+            submitBtn.disabled = isLoading;
+            if (isLoading) {
+                btnText.textContent = "로그인 중...";
+                loadingIcon.classList.remove('hidden');
+                submitBtn.classList.add('opacity-80', 'cursor-not-allowed');
+            } else {
+                btnText.textContent = "로그인";
+                loadingIcon.classList.add('hidden');
+                submitBtn.classList.remove('opacity-80', 'cursor-not-allowed');
+            }
+        }
+
+        function showError(message) {
+            errorMsg.textContent = message;
+            errorMsg.classList.remove('hidden');
+        }
+    </script>
+</body>
+
+</html>

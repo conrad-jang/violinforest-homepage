@@ -1,0 +1,754 @@
+<!DOCTYPE html>
+<html lang="ko">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>바이올린 포레스트 - 선생님 시간표</title>
+
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- SortableJS -->
+    <script src="https://cdn.jsdelivr.net/npm/sortablejs@latest/Sortable.min.js"></script>
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@200..800&family=Playfair+Display:ital,wght@0,400..900&family=Noto+Sans+KR:wght@300;400;500;700&family=Nanum+Myeongjo:wght@400;700;800&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" as="style" crossorigin
+        href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard-dynamic-subset.min.css" />
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap"
+        rel="stylesheet">
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#1e3a2f",
+                        "accent-gold": "#c5a044",
+                        "soft-beige": "#f2f1eb",
+                        "background-light": "#fcfbf7",
+                    },
+                    fontFamily: {
+                        "serif": ["Nanum Myeongjo", "serif"],
+                        "sans": ["Pretendard", "Noto Sans KR", "sans-serif"],
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        body {
+            font-family: "Pretendard", sans-serif;
+        }
+
+        .timetable-grid {
+            display: grid;
+            grid-template-columns: 80px repeat(6, minmax(120px, 1fr));
+            gap: 1px;
+            background-color: #cbd5e1;
+            /* grid lines color */
+            border: 1px solid #cbd5e1;
+        }
+
+        .time-cell {
+            background-color: #f8fafc;
+            text-align: center;
+            padding: 8px;
+            font-size: 0.8rem;
+            color: #475569;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            /* Explicit height to map exactly for absolute positioned cards */
+            height: 50px;
+        }
+
+        .day-header,
+        .day-header-corner {
+            background-color: #f2f1eb;
+            color: #1e3a2f;
+            text-align: center;
+            padding: 14px;
+            font-family: "Nanum Myeongjo", serif;
+            font-weight: bold;
+            font-size: 1.1rem;
+            border-bottom: 2px solid #c5a044;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .day-header span.date-text {
+            font-size: 0.75rem;
+            font-family: "Pretendard", sans-serif;
+            color: #64748b;
+            font-weight: normal;
+        }
+
+        .slot-cell {
+            background-color: white;
+            height: 50px;
+            /* Base 30-min slot is 50px */
+            position: relative;
+        }
+
+        .slot-cell:hover {
+            background-color: #f1f5f9;
+        }
+
+        .slot-cell.sortable-drag {
+            opacity: 0.3;
+        }
+
+        /* 엑셀 이미지 느낌의 학생 이름표 스타일 */
+        .student-card {
+            background-color: white;
+            color: #1e3a2f;
+            font-size: 0.85rem;
+            cursor: grab;
+            border: 1px solid #cbd5e1;
+            border-left: 4px solid #c5a044;
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            word-break: break-all;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            /* Absolute positioning within the slot */
+            position: absolute;
+            left: 2px;
+            right: 2px;
+            top: 1px;
+            /* slight gap */
+            z-index: 10;
+            padding: 4px 6px;
+            overflow: hidden;
+            transition: box-shadow 0.2s;
+            border-radius: 4px;
+        }
+
+        .student-card:hover {
+            z-index: 20;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+        }
+
+        .student-card:active {
+            cursor: grabbing;
+        }
+
+        /* Custom scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: #f1f1f1;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8;
+        }
+    </style>
+</head>
+
+<body class="bg-background-light text-slate-800 min-h-screen flex flex-col">
+    <!-- Header -->
+    <header class="bg-white border-b border-slate-200 shadow-sm sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-6 h-20 flex justify-between items-center">
+            <h1 class="text-2xl font-serif font-bold text-primary flex items-center gap-3">
+                <span class="material-symbols-outlined text-accent-gold text-3xl">calendar_month</span>
+                바이올린 포레스트 - 선생님 시간표
+            </h1>
+            <div class="flex items-center gap-4">
+                <span id="welcomeMsg"
+                    class="font-medium text-slate-600 bg-soft-beige px-4 py-2 rounded-full font-serif border border-slate-200"></span>
+                <button onclick="logout()"
+                    class="text-sm px-4 py-2 border border-slate-300 rounded-lg hover:bg-slate-50 transition-colors font-bold text-slate-600 flex items-center gap-1">
+                    <span class="material-symbols-outlined text-sm">logout</span> 로그아웃
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="flex-1 max-w-7xl mx-auto px-6 py-8 w-full flex flex-col h-[calc(100vh-80px)]">
+        <div
+            class="bg-white rounded-2xl shadow-xl shadow-primary/5 border border-slate-200/60 overflow-hidden flex flex-col flex-1">
+            <!-- Controls -->
+            <div class="p-6 border-b border-slate-100 flex flex-col md:flex-row justify-between items-center gap-4">
+                <div class="flex items-center gap-4">
+                    <button id="prevWeekBtn"
+                        class="p-2 mr-2 rounded-full hover:bg-soft-beige transition-colors border border-slate-200 text-slate-600 flex items-center justify-center">
+                        <span class="material-symbols-outlined">chevron_left</span>
+                    </button>
+                    <!-- Week Title -->
+                    <h2 id="weekTitle"
+                        class="text-2xl font-bold font-serif text-primary w-48 text-center min-w-[300px]">
+                        이번 주
+                    </h2>
+                    <button id="nextWeekBtn"
+                        class="p-2 ml-2 rounded-full hover:bg-soft-beige transition-colors border border-slate-200 text-slate-600 flex items-center justify-center">
+                        <span class="material-symbols-outlined">chevron_right</span>
+                    </button>
+                </div>
+                <!-- Action Status / Hint -->
+                <div class="flex items-center gap-4">
+                    <span id="syncStatus" class="text-sm text-slate-400 font-medium flex items-center gap-1">
+                        <span class="material-symbols-outlined text-[18px]">cloud_done</span> 최신 상태 동기화됨
+                    </span>
+                    <button id="refreshBtn" onclick="loadWeekData()"
+                        class="bg-soft-beige text-primary px-4 py-2 rounded-lg font-bold hover:bg-gray-100 border border-slate-200 transition-all flex items-center gap-1 shadow-sm">
+                        <span class="material-symbols-outlined text-sm">refresh</span> 새로고침
+                    </button>
+                </div>
+            </div>
+
+            <!-- Timetable Container -->
+            <div class="overflow-x-auto overflow-y-auto flex-1 bg-slate-50 relative p-4" id="scrollContainer">
+                <div class="timetable-grid min-w-[900px] shadow-sm bg-white" id="timetableGrid">
+                    <!-- Javascript will populate this grid -->
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- UI Overlay for Loading -->
+    <div id="loadingOverlay"
+        class="fixed inset-0 bg-white/70 backdrop-blur-sm z-[100] hidden items-center justify-center">
+        <div class="flex flex-col items-center gap-3">
+            <svg class="animate-spin h-10 w-10 text-primary" xmlns="http://www.w3.org/2000/svg" fill="none"
+                viewBox="0 0 24 24">
+                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                <path class="opacity-75" fill="currentColor"
+                    d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z">
+                </path>
+            </svg>
+            <span class="text-primary font-bold">시간표 동기화 중...</span>
+        </div>
+    </div>
+
+    <div id="statusModal" class="fixed inset-0 bg-black/50 backdrop-blur-sm z-[110] hidden items-center justify-center">
+        <div class="bg-white rounded-xl shadow-2xl w-80 overflow-hidden transform transition-all">
+            <div class="bg-primary px-6 py-4 flex justify-between items-center">
+                <h3 class="text-white font-serif font-bold text-lg">수업 관리</h3>
+                <button onclick="closeStatusModal()" class="text-white/70 hover:text-white transition-colors">
+                    <span class="material-symbols-outlined">close</span>
+                </button>
+            </div>
+            <div class="p-6">
+                <p id="modalStudentName" class="font-bold text-lg text-slate-800 mb-1">학생 이름</p>
+                <p id="modalTimeInfo" class="text-sm text-slate-500 mb-6">시간 정보</p>
+
+                <div class="flex flex-col gap-3">
+                    <button onclick="updateStudentStatus('수업완료')"
+                        class="w-full py-3 bg-green-600 hover:bg-green-700 text-white rounded-lg font-bold transition-colors flex items-center justify-center gap-2">
+                        <span class="material-symbols-outlined">check_circle</span> 수업 완료
+                    </button>
+                    <button onclick="updateStudentStatus('취소')"
+                        class="w-full py-3 bg-red-500 hover:bg-red-600 text-white rounded-lg font-bold transition-colors flex items-center justify-center gap-2">
+                        <span class="material-symbols-outlined">cancel</span> 수업 취소
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Constants & Config
+        const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwDVdNgJX4eiW_OejbaPvZWXOvvPQUSGelD1K7JQQkMPR5mzMdGVDjmHNNC3RbwnPPfcg/exec";
+        const WORK_DAYS = 6; // Mon(1) to Sat(6)
+        const START_MINUTES = 9 * 60; // 09:00
+        const END_MINUTES = 21 * 60; // 21:00
+
+        let currentDate = new Date(); // The date identifying the currently active week
+        let currentWeekDays = []; // Date objects for Monday-Saturday
+        let allTimetableData = []; // Store fetched data
+
+        const teacherName = localStorage.getItem('teacherName');
+        const teacherId = localStorage.getItem('teacherId');
+
+        // Ensure Logged In
+        if (!teacherName || !teacherId) {
+            alert("로그인이 필요합니다.");
+            window.location.href = 'teacher_login.html';
+        } else {
+            document.getElementById('welcomeMsg').innerHTML = `<span class="text-primary font-bold">${teacherName}</span> 선생님, 환영합니다.`;
+        }
+
+        function logout() {
+            localStorage.removeItem('teacherId');
+            localStorage.removeItem('teacherName');
+            window.location.href = 'teacher_login.html';
+        }
+
+        // ==========================================
+        // Modal Logic
+        // ==========================================
+        let activeStudentId = null;
+        let activeRecordId = null;
+
+        function openStatusModal(recordId, studentId, name, date, startTime, endTime) {
+            activeRecordId = recordId;
+            activeStudentId = studentId;
+            document.getElementById('modalStudentName').textContent = name;
+            document.getElementById('modalTimeInfo').textContent = `${date} ${startTime} ~ ${endTime}`;
+            document.getElementById('statusModal').classList.replace('hidden', 'flex');
+        }
+
+        function closeStatusModal() {
+            activeRecordId = null;
+            activeStudentId = null;
+            document.getElementById('statusModal').classList.replace('flex', 'hidden');
+        }
+
+        async function updateStudentStatus(status) {
+            if (!activeStudentId || !activeRecordId) return;
+
+            // 🚀 핵심 수정: 모달을 닫으면 ID가 날아가므로, 미리 변수에 꽉 쥐어줍니다!
+            const targetLessonId = activeRecordId;
+
+            // 모달을 닫고 로딩 표시
+            closeStatusModal();
+            showLoading(true);
+            setSyncStatus("상태 업데이트 중...");
+
+            try {
+                const payload = {
+                    action: 'updateStatus',
+                    lessonId: targetLessonId, // null 대신 안전하게 복사해둔 진짜 ID 전달
+                    newStatus: status
+                };
+
+                // [Optimistic UI] 즉각적인 화면 반영 (API 응답 지연 대비)
+                const itemIndex = allTimetableData.findIndex(item =>
+                    (item.lessonId || item.id || item.recordId || item.수업ID) == targetLessonId
+                );
+                if (itemIndex > -1) {
+                    allTimetableData[itemIndex].status = status;
+                    allTimetableData[itemIndex].상태 = status;
+                    filterAndRender(); // 먼저 화면을 바꿔줍니다
+                }
+
+                // 🚀 브라우저 에러(CORS) 원천 차단 시 발생하는 한글 인코딩 깨짐 현상 완벽 방어 (유니코드 직접 변환)
+                const safePayload = JSON.stringify(payload).replace(/[\u007F-\uFFFF]/g, function (chr) {
+                    return "\\u" + ("0000" + chr.charCodeAt(0).toString(16)).substr(-4);
+                });
+
+                await fetch(GOOGLE_SCRIPT_URL, {
+                    method: 'POST',
+                    mode: 'no-cors',
+                    headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+                    body: safePayload
+                });
+
+                // no-cors는 응답을 읽을 수 없으므로 무조건 성공으로 간주하고 진행
+                setSyncStatus("상태가 업데이트되었습니다.");
+
+                setTimeout(() => {
+                    loadWeekData();
+                }, 1500);
+
+            } catch (e) {
+                console.error(e);
+                setSyncStatus("업데이트 실패", true);
+                alert("상태 업데이트 중 오류가 발생했습니다.");
+                showLoading(false);
+            }
+        }
+
+        // ==========================================
+        // 1. Calendar / Week Math 
+        // ==========================================
+        function getWeekOfMonth(date) {
+            const firstDayOfMonth = new Date(date.getFullYear(), date.getMonth(), 1);
+            const firstDayOfWeek = firstDayOfMonth.getDay() || 7; // 1: Mon, 7: Sun
+            const offsetDate = date.getDate() + firstDayOfWeek - 1;
+            return Math.ceil(offsetDate / 7);
+        }
+
+        function renderCalendarUI() {
+            // Find Monday of the current selected date
+            const dayOfWeek = currentDate.getDay() || 7; // Map Sun=7, Mon=1
+            const diffToMonday = currentDate.getDate() - dayOfWeek + 1;
+            const monday = new Date(currentDate.getTime());
+            monday.setDate(diffToMonday);
+
+            // Generate Dates array for Mon to Sat
+            currentWeekDays = [];
+            for (let i = 0; i < WORK_DAYS; i++) {
+                const dayDate = new Date(monday.getTime());
+                dayDate.setDate(monday.getDate() + i);
+                currentWeekDays.push(dayDate);
+            }
+
+            // Update Title: "{Year}년 {Month}월 {Week}주차" -> Thursday to accurately represent the week
+            const thursday = new Date(monday.getTime());
+            thursday.setDate(monday.getDate() + 3);
+            const displayMonth = thursday.getMonth() + 1;
+            const displayYear = thursday.getFullYear();
+            const weekNum = getWeekOfMonth(thursday);
+
+            document.getElementById('weekTitle').textContent = `${displayYear}년 ${displayMonth}월 ${weekNum}째주`;
+
+            generateGrid();
+            filterAndRender(); // Re-filter data when week changes!
+        }
+
+        function formatDate(date) {
+            const y = date.getFullYear();
+            const m = String(date.getMonth() + 1).padStart(2, '0');
+            const d = String(date.getDate()).padStart(2, '0');
+            return `${y}-${m}-${d}`;
+        }
+
+        function formatTimeValue(minutes) {
+            const h = Math.floor(minutes / 60).toString().padStart(2, '0');
+            const m = (minutes % 60).toString().padStart(2, '0');
+            return `${h}:${m}`;
+        }
+
+        function parseTimeValue(timeStr) {
+            const parts = timeStr.split(':');
+            return parseInt(parts[0]) * 60 + parseInt(parts[1]);
+        }
+
+        // ==========================================
+        // 2. Generate Grid
+        // ==========================================
+        const grid = document.getElementById('timetableGrid');
+
+        function generateGrid() {
+            grid.innerHTML = ''; // Clear existing
+
+            // Dropzone Header Top-Left
+            const emptyHeader = document.createElement('div');
+            emptyHeader.className = 'day-header-corner';
+            grid.appendChild(emptyHeader);
+
+            // Columns Header (Mon-Sat with Dates)
+            const dayNames = ['월', '화', '수', '목', '금', '토'];
+            for (let i = 0; i < WORK_DAYS; i++) {
+                const dayDate = currentWeekDays[i];
+                const header = document.createElement('div');
+                header.className = 'day-header';
+                header.innerHTML = `
+                    ${dayNames[i]}
+                    <span class="date-text">${dayDate.getMonth() + 1}/${dayDate.getDate()}</span>
+                `;
+                grid.appendChild(header);
+            }
+
+            // Grid Slots
+            for (let time = START_MINUTES; time <= END_MINUTES; time += 30) {
+                const timeString = formatTimeValue(time);
+
+                // Time Label Column
+                const timeCell = document.createElement('div');
+                timeCell.className = 'time-cell';
+                timeCell.textContent = timeString;
+                grid.appendChild(timeCell);
+
+                // Grid Cells
+                for (let i = 0; i < WORK_DAYS; i++) {
+                    const dayDate = formatDate(currentWeekDays[i]);
+                    const slotId = `${dayDate}_${timeString}`; // Ex: 2026-03-09_09:00
+
+                    const slotCell = document.createElement('div');
+                    slotCell.className = 'slot-cell dropzone';
+                    slotCell.id = slotId;
+                    slotCell.dataset.date = dayDate;
+                    slotCell.dataset.time = timeString;
+                    grid.appendChild(slotCell);
+                }
+            }
+
+            initSortable();
+        }
+
+        function initSortable() {
+            const dropzones = document.querySelectorAll('.dropzone');
+            dropzones.forEach(zone => {
+                new Sortable(zone, {
+                    group: 'timetable',
+                    animation: 150,
+                    ghostClass: 'sortable-drag',
+                    // The element can be dragged freely within dropzones
+                    onEnd: async function (evt) {
+                        const itemEl = evt.item;
+                        const toSlot = evt.to;
+                        const fromSlot = evt.from;
+
+                        if (toSlot !== fromSlot) {
+                            // Extract metadata matching logic
+                            const recordId = itemEl.dataset.recordId;
+                            const studentId = itemEl.dataset.studentId;
+                            const newDate = toSlot.dataset.date;
+                            const newStartTime = toSlot.dataset.time;
+                            const duration = parseInt(itemEl.dataset.duration);
+                            const newEndTime = formatTimeValue(parseTimeValue(newStartTime) + duration);
+
+                            console.log(`Updated Record: ${recordId} / ${studentId} to ${newDate} ${newStartTime}~${newEndTime}`);
+
+                            // Visual adjust Top reset
+                            itemEl.style.top = '1px';
+                            itemEl.dataset.date = newDate;
+                            itemEl.dataset.startTime = newStartTime;
+                            itemEl.dataset.endTime = newEndTime;
+
+                            // Update display time inside card block
+                            const timeSpan = itemEl.querySelector('.time-range-display');
+                            if (timeSpan) timeSpan.textContent = `${newStartTime} ~ ${newEndTime}`;
+
+                            // Sync to Backend
+                            await syncMoveLesson(recordId, studentId, newDate, newStartTime, newEndTime);
+                        }
+                    },
+                });
+            });
+        }
+
+        // ==========================================
+        // 3. API & Data Loading 
+        // ==========================================
+        function showLoading(show) {
+            const overlay = document.getElementById('loadingOverlay');
+            if (show) overlay.classList.replace('hidden', 'flex');
+            else overlay.classList.replace('flex', 'hidden');
+        }
+
+        function setSyncStatus(status, isError = false) {
+            const syncEl = document.getElementById('syncStatus');
+            syncEl.innerHTML = `<span class="material-symbols-outlined text-[18px]">${isError ? 'error' : 'cloud_done'}</span> ${status}`;
+            syncEl.className = `text-sm font-medium flex items-center gap-1 ${isError ? 'text-red-500' : 'text-slate-400'}`;
+        }
+
+        async function loadWeekData() {
+            showLoading(true);
+
+            try {
+                // Get 요청 (학생 데이터 가져오기)
+                const url = new URL(GOOGLE_SCRIPT_URL);
+                url.searchParams.append('teacherId', teacherId);
+                url.searchParams.append('t', new Date().getTime()); // 캐시 방지 옵션
+
+                const response = await fetch(url.toString(), {
+                    method: 'GET'
+                });
+
+                const result = await response.json();
+
+                if (Array.isArray(result)) {
+                    allTimetableData = result;
+                } else if (result && result.data) {
+                    allTimetableData = result.data;
+                } else {
+                    allTimetableData = [];
+                }
+
+                setSyncStatus("데이터 로드 완료");
+                filterAndRender(); // Current week parsing
+
+            } catch (error) {
+                console.error("Fetch Error:", error);
+                setSyncStatus("데이터 동기화 실패 (네트워크)", true);
+                allTimetableData = [];
+                filterAndRender();
+            } finally {
+                showLoading(false);
+            }
+        }
+
+        async function syncMoveLesson(recordId, studentId, date, startTime, endTime) {
+            // [버그 픽스]: 이동 중 여러번 드래그하여 시트에 중복 기록되는 현상 원천 차단
+            showLoading(true);
+            setSyncStatus("일정 변경 중...");
+            try {
+                const payload = {
+                    action: 'moveLesson',
+                    lessonId: recordId,
+                    newDate: date,
+                    newStartTime: startTime,
+                    newEndTime: endTime
+                };
+
+                // 🚀 핵심 해결책: mode를 'no-cors'로 설정
+                await fetch(GOOGLE_SCRIPT_URL, {
+                    method: 'POST',
+                    mode: 'no-cors',
+                    headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+                    body: JSON.stringify(payload)
+                });
+
+                setSyncStatus("일정이 업데이트되었습니다.");
+
+                setTimeout(() => {
+                    loadWeekData();
+                }, 1500);
+
+            } catch (e) {
+                console.error(e);
+                setSyncStatus("일정 반영 실패", true);
+                alert("일정 이동 중 오류가 발생했습니다.");
+                loadWeekData();
+            }
+        }
+
+        // ==========================================
+        // 4. Component Rendering 
+        // ==========================================
+        function filterAndRender() {
+            // 현재 화면의 시작(월)과 끝(토) 날짜 계산
+            const startLimit = new Date(currentWeekDays[0].getFullYear(), currentWeekDays[0].getMonth(), currentWeekDays[0].getDate());
+            const endLimit = new Date(currentWeekDays[5].getFullYear(), currentWeekDays[5].getMonth(), currentWeekDays[5].getDate(), 23, 59, 59);
+
+            // 기존에 뿌려놓은 블록 지우기 (초기화)
+            document.querySelectorAll('.student-card').forEach(e => e.remove());
+
+            allTimetableData.forEach((item, index) => {
+                let rawDate = item.date;
+                let rawStart = item.startTime;
+                let rawEnd = item.endTime;
+
+                // 식별할 수 있는 고유 키
+                let recordId = item.lessonId || item.id || item.recordId || item.수업ID || item._id || ('temp_idx_' + index);
+                let studentId = item.studentId || ('temp_std_' + index);
+
+                // 학생 이름 (GAS 연결에서 빠질 수 있는 여러 필드명 지원 대비)
+                let name = item.studentName || item.name || item.학생명 || item.이름 || item.student;
+                if (!name) name = "알수없음";
+
+                // 상태 기반 필터링
+                let status = item.status || item.상태 || '예정';
+                if (status === '수업이월') return; // 이월된 데이터는 보이지 않게 처리
+
+                if (!rawDate || !rawStart || !rawEnd) return; // 비어있는 쓰레기값 건너뛰기
+
+                // 날짜 포맷 검증 후 이번 주에 해당하는지 검사 (UTC 오프셋 감안하여 Date() 객체 사용)
+                const dateObj = new Date(rawDate);
+
+                if (dateObj >= startLimit && dateObj <= endLimit) {
+                    const formattedDate = formatDate(dateObj); // 해당 요일(YYYY-MM-DD)
+
+                    const startObj = new Date(rawStart);
+                    const formattedStart = formatTimeValue(startObj.getHours() * 60 + startObj.getMinutes());
+
+                    const endObj = new Date(rawEnd);
+                    const formattedEnd = formatTimeValue(endObj.getHours() * 60 + endObj.getMinutes());
+
+                    const processedItem = {
+                        recordId: recordId,
+                        studentId: studentId,
+                        date: formattedDate,
+                        startTime: formattedStart,
+                        endTime: formattedEnd,
+                        studentName: name,
+                        status: status,
+                        color: item.color || item.색상 || '#c5a044'
+                    };
+
+                    const targetSlot = document.getElementById(`${processedItem.date}_${processedItem.startTime}`);
+
+                    if (targetSlot) {
+                        insertCardToSlot(targetSlot, processedItem);
+                    }
+                }
+            });
+        }
+
+        function insertCardToSlot(slot, item) {
+            // 박스의 유동적인 높이 조절
+            const startMins = parseTimeValue(item.startTime);
+            const endMins = parseTimeValue(item.endTime);
+            const duration = endMins - startMins; // in minutes
+
+            // 30 mins = 1 slot length (51px approx)
+            const blocksSpan = duration / 30;
+            const heightPixel = (blocksSpan * 51) - 3;
+
+            const el = document.createElement('div');
+            el.className = 'student-card';
+            el.dataset.recordId = item.recordId;
+            el.dataset.studentId = item.studentId;
+            el.dataset.duration = duration;
+            el.style.height = `${Math.max(30, heightPixel)}px`; // 최소 높이 보장
+
+            if (item.color) el.style.borderLeftColor = item.color;
+
+            // 완료 및 취소된 수업인 경우 디자인 변경 (투명도, 스트라이크스루)
+            let isPastAction = (item.status === '수업완료' || item.status === '취소');
+            let statusText = (item.status === '예정' || !item.status) ? '' : `(${item.status})`;
+
+            if (isPastAction) {
+                // 취소/완료된 카드는 아래로 깔리고 크기가 살짝 작아져서 새 카드를 위에 겹치기 쉽게 만듭니다.
+                el.classList.add('opacity-60', 'bg-slate-50');
+                el.style.zIndex = '5';
+                el.style.width = 'calc(100% - 12px)';
+            } else {
+                el.style.zIndex = '10';
+            }
+
+            // 겹쳤을 때 보기 좋게 약간의 위치 보정 (기존 카드가 있으면 살짝 아래/오른쪽으로 밀기)
+            const existingCards = slot.querySelectorAll('.student-card').length;
+            if (existingCards > 0) {
+                el.style.left = `${2 + (existingCards * 4)}px`;
+                el.style.top = `${1 + (existingCards * 4)}px`;
+            }
+
+            // 표시 내용
+            el.innerHTML = `
+                <div class="flex-1 overflow-hidden cursor-pointer" onclick="openStatusModal('${item.recordId}', '${item.studentId}', '${item.studentName}', '${item.date}', '${item.startTime}', '${item.endTime}')">
+                    <div class="font-bold tracking-tight leading-tight truncate ${isPastAction ? 'text-slate-400 line-through' : 'text-[#1e3a2f]'} drop-shadow-sm">
+                        ${item.studentName} <span class="text-[0.7rem] font-normal ml-0.5">${statusText}</span>
+                    </div>
+                    ${blocksSpan >= 1 ? `<div class="time-range-display text-[0.65rem] text-slate-400 mt-1">${item.startTime} ~ ${item.endTime}</div>` : ''}
+                </div>
+                <div class="text-slate-300 ml-1 cursor-grab active:cursor-grabbing shrink-0 mt-0.5">
+                    <span class="material-symbols-outlined text-[16px]">drag_indicator</span>
+                </div>
+            `;
+            slot.appendChild(el);
+        }
+
+        // ==========================================
+        // UI Navigation Listeners
+        // ==========================================
+        document.getElementById('prevWeekBtn').addEventListener('click', () => {
+            currentDate.setDate(currentDate.getDate() - 7);
+            renderCalendarUI(); // 화면 달력 갱신 + 필터링 동시 진행 (이미 불러온 API 데이터 활용)
+            loadWeekData(); // 안전하게 시트 재반영 (새로 받아오기)
+        });
+
+        document.getElementById('nextWeekBtn').addEventListener('click', () => {
+            currentDate.setDate(currentDate.getDate() + 7);
+            renderCalendarUI();
+            loadWeekData(); // 안전하게 시트 재반영 (새로 받아오기)
+        });
+
+        // ==========================================
+        // INIT
+        // ==========================================
+        currentDate = new Date(); // 페이지 로드 시 현재 날짜 (이번 주) 설정 자동
+        renderCalendarUI();
+        loadWeekData();
+
+        // Optional scroll centering
+        window.addEventListener('load', () => {
+            const container = document.getElementById('scrollContainer');
+            container.scrollTop = 7 * 51; // Scroll to ~ 12:30 or 13:00 area initially 
+        });
+
+    </script>
+</body>
+
+</html>

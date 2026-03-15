@@ -132,11 +132,22 @@
                     <a href="#curriculum" class="nav-link text-slate-600 hover:text-primary transition-colors">커리큘럼</a>
                     <a href="#pricing" class="nav-link text-slate-600 hover:text-primary transition-colors">원비안내</a>
                     <a href="#location" class="nav-link text-slate-600 hover:text-primary transition-colors">오시는길</a>
-                    <a href="#contact"
-                        class="px-6 py-2.5 bg-primary text-white rounded-full hover:bg-primary-light transition-all shadow-lg shadow-primary/20">상담예약</a>
+                    <div class="flex items-center gap-3">
+                        <a href="#contact"
+                            class="px-6 py-2.5 bg-primary text-white rounded-full hover:bg-primary-light transition-all shadow-lg shadow-primary/20">상담예약</a>
+                        <a href="teacher_login.html"
+                            class="flex items-center justify-center opacity-50 hover:opacity-100 transition-opacity"
+                            title="관리자 페이지">
+                            <span class="material-symbols-outlined text-[18px] text-slate-500">lock</span>
+                        </a>
+                    </div>
                 </div>
-                <!-- Mobile Menu Button -->
-                <div class="md:hidden flex items-center">
+                <!-- Mobile Menu Button & Admin -->
+                <div class="md:hidden flex items-center gap-3">
+                    <a href="teacher_login.html" class="flex items-center justify-center opacity-50 hover:opacity-100"
+                        title="관리자 페이지">
+                        <span class="material-symbols-outlined text-[18px] text-slate-500">lock</span>
+                    </a>
                     <button id="mobile-menu-button"
                         class="text-primary focus:outline-none p-2 rounded-full hover:bg-slate-100">
                         <span class="material-symbols-outlined text-3xl">menu</span>
