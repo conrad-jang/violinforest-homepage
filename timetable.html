@@ -27,6 +27,9 @@
         tailwind.config = {
             theme: {
                 extend: {
+                    screens: {
+                        'xs': '480px',
+                    },
                     colors: {
                         "primary": "#1e3a2f",
                         "accent-gold": "#c5a044",
@@ -59,15 +62,21 @@
         .time-cell {
             background-color: #f8fafc;
             text-align: center;
-            padding: 8px;
-            font-size: 0.8rem;
+            padding: 4px;
+            font-size: 0.7rem;
             color: #475569;
             font-weight: 500;
             display: flex;
             align-items: center;
             justify-content: center;
-            /* Explicit height to map exactly for absolute positioned cards */
             height: 50px;
+        }
+
+        @media (min-width: 640px) {
+            .time-cell {
+                padding: 8px;
+                font-size: 0.8rem;
+            }
         }
 
         .day-header,
@@ -75,20 +84,35 @@
             background-color: #f2f1eb;
             color: #1e3a2f;
             text-align: center;
-            padding: 14px;
+            padding: 8px;
             font-family: "Nanum Myeongjo", serif;
             font-weight: bold;
-            font-size: 1.1rem;
+            font-size: 0.9rem;
             border-bottom: 2px solid #c5a044;
             display: flex;
             flex-direction: column;
+            justify-content: center;
+        }
+
+        @media (min-width: 640px) {
+            .day-header,
+            .day-header-corner {
+                padding: 14px;
+                font-size: 1.1rem;
+            }
         }
 
         .day-header span.date-text {
-            font-size: 0.75rem;
+            font-size: 0.65rem;
             font-family: "Pretendard", sans-serif;
             color: #64748b;
             font-weight: normal;
+        }
+
+        @media (min-width: 640px) {
+            .day-header span.date-text {
+                font-size: 0.75rem;
+            }
         }
 
         .slot-cell {
@@ -143,21 +167,25 @@
 
         /* Custom scrollbar */
         ::-webkit-scrollbar {
-            width: 8px;
-            height: 8px;
+            width: 6px;
+            height: 6px;
         }
 
         ::-webkit-scrollbar-track {
-            background: #f1f1f1;
+            background: #f8fafc;
         }
 
         ::-webkit-scrollbar-thumb {
             background: #cbd5e1;
-            border-radius: 4px;
+            border-radius: 10px;
         }
 
         ::-webkit-scrollbar-thumb:hover {
             background: #94a3b8;
+        }
+
+        #scrollContainer {
+            -webkit-overflow-scrolling: touch;
         }
     </style>
 </head>
@@ -165,58 +193,78 @@
 <body class="bg-background-light text-slate-800 min-h-screen flex flex-col">
     <!-- Header -->
     <header class="bg-white border-b border-slate-200 shadow-sm sticky top-0 z-50">
-        <div class="max-w-7xl mx-auto px-6 h-20 flex justify-between items-center">
-            <h1 class="text-2xl font-serif font-bold text-primary flex items-center gap-3">
-                <span class="material-symbols-outlined text-accent-gold text-3xl">calendar_month</span>
-                바이올린 포레스트 - 선생님 시간표
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 h-auto md:h-20 flex flex-col md:flex-row justify-between items-center py-4 md:py-0 gap-4">
+            <h1 class="text-xl sm:text-2xl font-serif font-bold text-primary flex items-center gap-2 sm:gap-3">
+                <span class="material-symbols-outlined text-accent-gold text-2xl sm:text-3xl">calendar_month</span>
+                <span class="hidden xs:inline">바이올린 포레스트 - </span>선생님 시간표
             </h1>
-            <div class="flex items-center gap-4">
+            <div class="flex items-center gap-2 sm:gap-4 w-full md:w-auto justify-between md:justify-end">
                 <span id="welcomeMsg"
-                    class="font-medium text-slate-600 bg-soft-beige px-4 py-2 rounded-full font-serif border border-slate-200"></span>
+                    class="text-xs sm:text-sm font-medium text-slate-600 bg-soft-beige px-3 sm:px-4 py-1.5 sm:py-2 rounded-full font-serif border border-slate-200 truncate max-w-[200px] md:max-w-none"></span>
                 <button onclick="logout()"
-                    class="text-sm px-4 py-2 border border-slate-300 rounded-lg hover:bg-slate-50 transition-colors font-bold text-slate-600 flex items-center gap-1">
-                    <span class="material-symbols-outlined text-sm">logout</span> 로그아웃
+                    class="text-xs sm:text-sm px-3 sm:px-4 py-1.5 sm:py-2 border border-slate-300 rounded-lg hover:bg-slate-50 transition-colors font-bold text-slate-600 flex items-center gap-1 shrink-0">
+                    <span class="material-symbols-outlined text-sm sm:text-base">logout</span> 로그아웃
                 </button>
             </div>
         </div>
     </header>
 
     <!-- Main Content -->
-    <main class="flex-1 max-w-7xl mx-auto px-6 py-8 w-full flex flex-col h-[calc(100vh-80px)]">
+    <main class="flex-1 max-w-7xl mx-auto px-4 sm:px-6 py-4 sm:py-8 w-full flex flex-col h-[calc(100vh-80px)]">
         <div
-            class="bg-white rounded-2xl shadow-xl shadow-primary/5 border border-slate-200/60 overflow-hidden flex flex-col flex-1">
+            class="bg-white rounded-xl sm:rounded-2xl shadow-xl shadow-primary/5 border border-slate-200/60 overflow-hidden flex flex-col flex-1">
             <!-- Controls -->
-            <div class="p-6 border-b border-slate-100 flex flex-col md:flex-row justify-between items-center gap-4">
-                <div class="flex items-center gap-4">
-                    <button id="prevWeekBtn"
-                        class="p-2 mr-2 rounded-full hover:bg-soft-beige transition-colors border border-slate-200 text-slate-600 flex items-center justify-center">
-                        <span class="material-symbols-outlined">chevron_left</span>
-                    </button>
-                    <!-- Week Title -->
-                    <h2 id="weekTitle"
-                        class="text-2xl font-bold font-serif text-primary w-48 text-center min-w-[300px]">
-                        이번 주
-                    </h2>
-                    <button id="nextWeekBtn"
-                        class="p-2 ml-2 rounded-full hover:bg-soft-beige transition-colors border border-slate-200 text-slate-600 flex items-center justify-center">
-                        <span class="material-symbols-outlined">chevron_right</span>
-                    </button>
+            <div class="p-4 sm:p-6 border-b border-slate-100 flex flex-col gap-4">
+                <div class="flex flex-col sm:flex-row justify-between items-center gap-4">
+                    <div class="flex items-center gap-2 sm:gap-4">
+                        <button id="prevWeekBtn"
+                            class="p-1.5 sm:p-2 rounded-full hover:bg-soft-beige transition-colors border border-slate-200 text-slate-600 flex items-center justify-center">
+                            <span class="material-symbols-outlined">chevron_left</span>
+                        </button>
+                        <!-- Week Title -->
+                        <h2 id="weekTitle"
+                            class="text-lg sm:text-2xl font-bold font-serif text-primary w-auto sm:w-48 text-center min-w-[200px] sm:min-w-[300px]">
+                            이번 주
+                        </h2>
+                        <button id="nextWeekBtn"
+                            class="p-1.5 sm:p-2 rounded-full hover:bg-soft-beige transition-colors border border-slate-200 text-slate-600 flex items-center justify-center">
+                            <span class="material-symbols-outlined">chevron_right</span>
+                        </button>
+                    </div>
+                    
+                    <div class="flex items-center gap-2 sm:gap-4">
+                        <button id="refreshBtn" onclick="loadWeekData()"
+                            class="bg-soft-beige text-primary px-3 sm:px-4 py-1.5 sm:py-2 rounded-lg font-bold hover:bg-gray-100 border border-slate-200 transition-all flex items-center gap-1 shadow-sm text-xs sm:text-sm">
+                            <span class="material-symbols-outlined text-sm sm:text-base">refresh</span> 새로고침
+                        </button>
+                    </div>
                 </div>
-                <!-- Action Status / Hint -->
-                <div class="flex items-center gap-4">
-                    <span id="syncStatus" class="text-sm text-slate-400 font-medium flex items-center gap-1">
-                        <span class="material-symbols-outlined text-[18px]">cloud_done</span> 최신 상태 동기화됨
+
+                <!-- Zoom Control and Status -->
+                <div class="flex flex-wrap items-center justify-between gap-3 pt-2 border-t border-slate-50">
+                    <div class="flex items-center gap-3">
+                        <span class="text-[10px] sm:text-xs text-slate-400 font-bold uppercase tracking-wider">보기 비율</span>
+                        <div class="flex items-center bg-slate-100 rounded-lg p-1">
+                            <button onclick="adjustZoom(-0.1)" class="p-1 hover:bg-white rounded transition-colors shadow-sm">
+                                <span class="material-symbols-outlined text-sm sm:text-base">zoom_out</span>
+                            </button>
+                            <span id="zoomLevelText" class="px-2 text-xs sm:text-sm font-bold text-slate-600 min-w-[3.5rem] text-center">100%</span>
+                            <button onclick="adjustZoom(0.1)" class="p-1 hover:bg-white rounded transition-colors shadow-sm">
+                                <span class="material-symbols-outlined text-sm sm:text-base">zoom_in</span>
+                            </button>
+                        </div>
+                        <button onclick="resetZoom()" class="text-[10px] sm:text-xs text-primary font-bold hover:underline">맞춤</button>
+                    </div>
+                    
+                    <span id="syncStatus" class="text-[10px] sm:text-xs text-slate-400 font-medium flex items-center gap-1">
+                        <span class="material-symbols-outlined text-[14px] sm:text-[18px]">cloud_done</span> 최신 상태 동기화됨
                     </span>
-                    <button id="refreshBtn" onclick="loadWeekData()"
-                        class="bg-soft-beige text-primary px-4 py-2 rounded-lg font-bold hover:bg-gray-100 border border-slate-200 transition-all flex items-center gap-1 shadow-sm">
-                        <span class="material-symbols-outlined text-sm">refresh</span> 새로고침
-                    </button>
                 </div>
             </div>
 
             <!-- Timetable Container -->
-            <div class="overflow-x-auto overflow-y-auto flex-1 bg-slate-50 relative p-4" id="scrollContainer">
-                <div class="timetable-grid min-w-[900px] shadow-sm bg-white" id="timetableGrid">
+            <div class="overflow-x-auto overflow-y-auto flex-1 bg-slate-50 relative p-2 sm:p-4 scroll-smooth" id="scrollContainer">
+                <div class="timetable-grid min-w-[700px] sm:min-w-[900px] shadow-sm bg-white origin-top-left transition-transform duration-200" id="timetableGrid">
                     <!-- Javascript will populate this grid -->
                 </div>
             </div>
@@ -736,16 +784,63 @@
         });
 
         // ==========================================
+        // Zoom Logic
+        // ==========================================
+        let currentZoom = 1.0;
+        
+        function adjustZoom(delta) {
+            currentZoom = Math.min(Math.max(0.5, currentZoom + delta), 2.0);
+            applyZoom();
+        }
+
+        function resetZoom() {
+            const container = document.getElementById('scrollContainer');
+            const grid = document.getElementById('timetableGrid');
+            const containerWidth = container.clientWidth - (window.innerWidth < 640 ? 16 : 32); 
+            const gridWidth = 900; // Original min-width
+            
+            // On mobile, if screen is narrow, fit to width. Otherwise 100%
+            if (window.innerWidth < gridWidth) {
+                currentZoom = containerWidth / gridWidth;
+            } else {
+                currentZoom = 1.0;
+            }
+            
+            applyZoom();
+        }
+
+        function applyZoom() {
+            const grid = document.getElementById('timetableGrid');
+            grid.style.transform = `scale(${currentZoom})`;
+            document.getElementById('zoomLevelText').textContent = `${Math.round(currentZoom * 100)}%`;
+            
+            // Adjust container height to match scaled content
+            // Since we use origin-top-left, we need to ensure the container 
+            // understands the new height of the grid
+            const gridHeight = grid.scrollHeight;
+            grid.parentNode.style.minHeight = `${gridHeight * currentZoom + 40}px`;
+        }
+
+        // ==========================================
         // INIT
         // ==========================================
-        currentDate = new Date(); // 페이지 로드 시 현재 날짜 (이번 주) 설정 자동
+        currentDate = new Date();
         renderCalendarUI();
         loadWeekData();
 
         // Optional scroll centering
         window.addEventListener('load', () => {
             const container = document.getElementById('scrollContainer');
-            container.scrollTop = 7 * 51; // Scroll to ~ 12:30 or 13:00 area initially 
+            container.scrollTop = 7 * 51; 
+            
+            // Initial zoom fit for mobile
+            if (window.innerWidth < 768) {
+                resetZoom();
+            }
+        });
+
+        window.addEventListener('resize', () => {
+             // Optional: handle zoom on resize if needed
         });
 
     </script>
