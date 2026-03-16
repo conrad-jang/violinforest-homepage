@@ -625,9 +625,11 @@
             }
         }
 
-        // [낙관적 업데이트] Sortable이 이미 DOM을 이동시켰으므로 로컬 데이터만 조용히 갱신하고 큐에 담습니다.
+        const dragDebounceTimers = {}; // lessonId별 디바운스 타이머 관리
+
+        // [디바운스] 드래그가 멈춘 뒤 800ms 후에만 서버 전송 → 중간 위치는 완전히 무시
         async function syncMoveLesson(recordId, studentId, date, startTime, endTime) {
-            // 1. 로컬 데이터 갱신 (화면은 이미 Sortable.js가 즉시 이동시켰으므로 filterAndRender 호출 안 함)
+            // 1. 로컬 데이터 갱신 (화면은 Sortable.js가 이미 이동시킴)
             const itemIndex = allTimetableData.findIndex(item =>
                 (item.lessonId || item.id || item.recordId || item.수업ID) == recordId
             );
@@ -637,18 +639,26 @@
                 allTimetableData[itemIndex].endTime = endTime;
             }
 
-            // 2. [중복 제거] 같은 lessonId가 큐에 이미 있으면 덮어쓰기 (새 위치로 교체)
-            //    → 여러 번 드래그해도 서버에는 최종 위치 1건만 전송됨
-            const newPayload = { action: 'moveLesson', lessonId: recordId, newDate: date, newStartTime: startTime, newEndTime: endTime };
-            const existingIdx = requestQueue.findIndex(q => q.lessonId == recordId);
-            if (existingIdx > -1) {
-                requestQueue[existingIdx] = newPayload; // 기존 요청 덮어쓰기
-                setSyncStatus("위치 업데이트 (대기중)...");
-            } else {
-                requestQueue.push(newPayload); // 신규 요청 추가
+            // 2. 같은 레슨의 기존 대기 타이머가 있으면 취소 (연속 드래그 → 마지막 위치만 전송)
+            if (dragDebounceTimers[recordId]) {
+                clearTimeout(dragDebounceTimers[recordId]);
             }
 
-            processQueue();
+            setSyncStatus("이동 확인 중...");
+
+            // 3. 800ms 동안 추가 드래그가 없으면 그때 서버로 전송
+            dragDebounceTimers[recordId] = setTimeout(() => {
+                delete dragDebounceTimers[recordId];
+                const payload = { action: 'moveLesson', lessonId: recordId, newDate: date, newStartTime: startTime, newEndTime: endTime };
+                // 큐에도 중복 제거 후 추가 (혹시 처리 중인 큐가 있을 경우 대비)
+                const existingIdx = requestQueue.findIndex(q => q.lessonId == recordId);
+                if (existingIdx > -1) {
+                    requestQueue[existingIdx] = payload;
+                } else {
+                    requestQueue.push(payload);
+                }
+                processQueue();
+            }, 800);
         }
 
         // [순차 큐] 한 번에 하나씩 서버에 전송하여 race condition 방지
