@@ -538,7 +538,8 @@
                     group: 'timetable',
                     animation: 150,
                     ghostClass: 'sortable-drag',
-                    // The element can be dragged freely within dropzones
+                    filter: '.no-drag',        // 완료/취소 카드는 드래그 불가
+                    preventOnFilter: true,     // 필터된 요소에서 드래그 이벤트 차단
                     onEnd: async function (evt) {
                         const itemEl = evt.item;
                         const toSlot = evt.to;
@@ -778,9 +779,10 @@
 
             if (isPastAction) {
                 // 취소/완료된 카드는 아래로 깔리고 크기가 살짝 작아져서 새 카드를 위에 겹치기 쉽게 만듭니다.
-                el.classList.add('opacity-60', 'bg-slate-50');
+                el.classList.add('opacity-60', 'bg-slate-50', 'no-drag'); // no-drag: Sortable 드래그 차단
                 el.style.zIndex = '5';
                 el.style.width = 'calc(100% - 12px)';
+                el.style.cursor = 'default'; // 드래그 불가 커서
             } else {
                 el.style.zIndex = '10';
             }
