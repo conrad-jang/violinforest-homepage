@@ -637,8 +637,17 @@
                 allTimetableData[itemIndex].endTime = endTime;
             }
 
-            // 2. 큐에 서버 요청 추가 후 순차 처리
-            requestQueue.push({ action: 'moveLesson', lessonId: recordId, newDate: date, newStartTime: startTime, newEndTime: endTime });
+            // 2. [중복 제거] 같은 lessonId가 큐에 이미 있으면 덮어쓰기 (새 위치로 교체)
+            //    → 여러 번 드래그해도 서버에는 최종 위치 1건만 전송됨
+            const newPayload = { action: 'moveLesson', lessonId: recordId, newDate: date, newStartTime: startTime, newEndTime: endTime };
+            const existingIdx = requestQueue.findIndex(q => q.lessonId == recordId);
+            if (existingIdx > -1) {
+                requestQueue[existingIdx] = newPayload; // 기존 요청 덮어쓰기
+                setSyncStatus("위치 업데이트 (대기중)...");
+            } else {
+                requestQueue.push(newPayload); // 신규 요청 추가
+            }
+
             processQueue();
         }
 
