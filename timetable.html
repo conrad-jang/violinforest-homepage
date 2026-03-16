@@ -307,6 +307,10 @@
                         class="w-full py-3 bg-red-500 hover:bg-red-600 text-white rounded-lg font-bold transition-colors flex items-center justify-center gap-2">
                         <span class="material-symbols-outlined">cancel</span> 수업 취소
                     </button>
+                    <button onclick="updateStudentStatus('예정')"
+                        class="w-full py-3 bg-slate-500 hover:bg-slate-600 text-white rounded-lg font-bold transition-colors flex items-center justify-center gap-2">
+                        <span class="material-symbols-outlined">schedule</span> 예정으로 변경
+                    </button>
                 </div>
             </div>
         </div>
@@ -346,10 +350,11 @@
         let activeStudentId = null;
         let activeRecordId = null;
 
-        function openStatusModal(recordId, studentId, name, date, startTime, endTime) {
+        function openStatusModal(recordId, studentId, name, date, startTime, endTime, status) {
             activeRecordId = recordId;
             activeStudentId = studentId;
-            document.getElementById('modalStudentName').textContent = name;
+            const statusText = (status === '예정' || !status) ? '' : ` (${status})`;
+            document.getElementById('modalStudentName').textContent = name + statusText;
             document.getElementById('modalTimeInfo').textContent = `${date} ${startTime} ~ ${endTime}`;
             document.getElementById('statusModal').classList.replace('hidden', 'flex');
         }
@@ -731,7 +736,14 @@
             el.dataset.duration = duration;
             el.style.height = `${Math.max(30, heightPixel)}px`; // 최소 높이 보장
 
-            if (item.color) el.style.borderLeftColor = item.color;
+            // 상태에 따른 왼쪽 라인 색상 지정
+            if (item.status === '수업완료') {
+                el.style.borderLeftColor = '#22c55e'; // 초록색 (Success)
+            } else if (item.status === '취소') {
+                el.style.borderLeftColor = '#ef4444'; // 빨간색 (Error/Cancel)
+            } else {
+                el.style.borderLeftColor = '#eab308'; // 노란색 (Warning/Scheduled)
+            }
 
             // 완료 및 취소된 수업인 경우 디자인 변경 (투명도, 스트라이크스루)
             let isPastAction = (item.status === '수업완료' || item.status === '취소');
@@ -755,8 +767,8 @@
 
             // 표시 내용
             el.innerHTML = `
-                <div class="flex-1 overflow-hidden cursor-pointer" onclick="openStatusModal('${item.recordId}', '${item.studentId}', '${item.studentName}', '${item.date}', '${item.startTime}', '${item.endTime}')">
-                    <div class="font-bold tracking-tight leading-tight truncate ${isPastAction ? 'text-slate-400 line-through' : 'text-[#1e3a2f]'} drop-shadow-sm">
+                <div class="flex-1 overflow-hidden cursor-pointer" onclick="openStatusModal('${item.recordId}', '${item.studentId}', '${item.studentName}', '${item.date}', '${item.startTime}', '${item.endTime}', '${item.status}')">
+                    <div class="font-bold tracking-tight leading-tight ${isPastAction ? 'text-slate-400 line-through' : 'text-[#1e3a2f]'} drop-shadow-sm break-words">
                         ${item.studentName} <span class="text-[0.7rem] font-normal ml-0.5">${statusText}</span>
                     </div>
                     ${blocksSpan >= 1 ? `<div class="time-range-display text-[0.65rem] text-slate-400 mt-1">${item.startTime} ~ ${item.endTime}</div>` : ''}
