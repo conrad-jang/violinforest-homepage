@@ -624,9 +624,9 @@
             }
         }
 
-        // [낙관적 업데이트] 드래그 즉시 로컬 데이터를 바꾸고, 큐에 요청을 담습니다.
+        // [낙관적 업데이트] Sortable이 이미 DOM을 이동시켰으므로 로컬 데이터만 조용히 갱신하고 큐에 담습니다.
         async function syncMoveLesson(recordId, studentId, date, startTime, endTime) {
-            // 1. 낙관적 UI 업데이트: 로컬 데이터를 즉시 수정 후 화면 반영
+            // 1. 로컬 데이터 갱신 (화면은 이미 Sortable.js가 즉시 이동시켰으므로 filterAndRender 호출 안 함)
             const itemIndex = allTimetableData.findIndex(item =>
                 (item.lessonId || item.id || item.recordId || item.수업ID) == recordId
             );
@@ -634,7 +634,6 @@
                 allTimetableData[itemIndex].date = date;
                 allTimetableData[itemIndex].startTime = startTime;
                 allTimetableData[itemIndex].endTime = endTime;
-                filterAndRender();
             }
 
             // 2. 큐에 서버 요청 추가 후 순차 처리
