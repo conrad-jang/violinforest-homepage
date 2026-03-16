@@ -326,6 +326,8 @@
         let currentDate = new Date(); // The date identifying the currently active week
         let currentWeekDays = []; // Date objects for Monday-Saturday
         let allTimetableData = []; // Store fetched data
+        let isSyncing = false;    // 동시 요청 방지 플래그
+        let requestQueue = [];    // 순차 처리 요청 큐
 
         const teacherName = localStorage.getItem('teacherName');
         const teacherId = localStorage.getItem('teacherId');
@@ -622,38 +624,64 @@
             }
         }
 
+        // [낙관적 업데이트] 드래그 즉시 로컬 데이터를 바꾸고, 큐에 요청을 담습니다.
         async function syncMoveLesson(recordId, studentId, date, startTime, endTime) {
-            // [버그 픽스]: 이동 중 여러번 드래그하여 시트에 중복 기록되는 현상 원천 차단
-            showLoading(true);
-            setSyncStatus("일정 변경 중...");
-            try {
-                const payload = {
-                    action: 'moveLesson',
-                    lessonId: recordId,
-                    newDate: date,
-                    newStartTime: startTime,
-                    newEndTime: endTime
-                };
+            // 1. 낙관적 UI 업데이트: 로컬 데이터를 즉시 수정 후 화면 반영
+            const itemIndex = allTimetableData.findIndex(item =>
+                (item.lessonId || item.id || item.recordId || item.수업ID) == recordId
+            );
+            if (itemIndex > -1) {
+                allTimetableData[itemIndex].date = date;
+                allTimetableData[itemIndex].startTime = startTime;
+                allTimetableData[itemIndex].endTime = endTime;
+                filterAndRender();
+            }
 
-                // 🚀 핵심 해결책: mode를 'no-cors'로 설정
+            // 2. 큐에 서버 요청 추가 후 순차 처리
+            requestQueue.push({ action: 'moveLesson', lessonId: recordId, newDate: date, newStartTime: startTime, newEndTime: endTime });
+            processQueue();
+        }
+
+        // [순차 큐] 한 번에 하나씩 서버에 전송하여 race condition 방지
+        async function processQueue() {
+            if (isSyncing || requestQueue.length === 0) return;
+            isSyncing = true;
+            const payload = requestQueue.shift();
+            setSyncStatus("동기화 중...");
+            try {
                 await fetch(GOOGLE_SCRIPT_URL, {
                     method: 'POST',
                     mode: 'no-cors',
                     headers: { 'Content-Type': 'text/plain;charset=utf-8' },
                     body: JSON.stringify(payload)
                 });
-
-                setSyncStatus("일정이 업데이트되었습니다.");
-
-                setTimeout(() => {
-                    loadWeekData();
-                }, 1500);
-
+                setSyncStatus("동기화 완료");
             } catch (e) {
                 console.error(e);
-                setSyncStatus("일정 반영 실패", true);
-                alert("일정 이동 중 오류가 발생했습니다.");
-                loadWeekData();
+                setSyncStatus("저장 실패", true);
+            } finally {
+                isSyncing = false;
+                if (requestQueue.length > 0) {
+                    processQueue(); // 다음 요청 처리
+                } else {
+                    // 모든 요청 완료 후 2초 뒤 백그라운드에서 조용히 서버 데이터 재확인
+                    setTimeout(() => { if (!isSyncing) loadWeekDataQuietly(); }, 2000);
+                }
+            }
+        }
+
+        // [백그라운드 갱신] 로딩 화면 없이 데이터를 조용히 가져와 갱신
+        async function loadWeekDataQuietly() {
+            try {
+                const url = new URL(GOOGLE_SCRIPT_URL);
+                url.searchParams.append('teacherId', teacherId);
+                url.searchParams.append('t', new Date().getTime());
+                const response = await fetch(url.toString());
+                const result = await response.json();
+                allTimetableData = (result && result.data) ? result.data : (Array.isArray(result) ? result : []);
+                filterAndRender();
+            } catch (e) {
+                console.error("백그라운드 갱신 실패:", e);
             }
         }
 
